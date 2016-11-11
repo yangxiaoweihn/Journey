@@ -1,0 +1,17 @@
+{
+  "name": "journey/journey",
+  "description": "description_text",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "author's name",
+      "email": "email@example.com"
+    }
+  ],
+  "autoload-dev": {
+    "psr-4": {
+      "Journey\\": "src/"
+    }
+  }
+}

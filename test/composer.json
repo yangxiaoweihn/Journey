@@ -1,0 +1,8 @@
+{
+  "name": "test/test1",
+  "autoload": {
+    "psr-4": {
+      "Test0\\": "src/"
+    }
+  }
+}
