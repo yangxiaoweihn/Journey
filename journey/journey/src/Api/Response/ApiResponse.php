@@ -89,7 +89,7 @@ class ApiResponse{
         return array(
             'code' => $code,
             'message' => $msg,
-            'data' => $data
+            'data' => empty($data) ? null : $data
         );
     }
 }

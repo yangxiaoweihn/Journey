@@ -10,7 +10,7 @@ class Config {
     private static $dbConfigDebug = array(
         'driver'    => 'mysql',
         'host'      => '127.0.0.1',
-        'database'  => 'journey',
+        'database'  => 'journey_book',
         'port'      => '3306',
         'username'  => 'root',
         'password'  => '',

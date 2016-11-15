@@ -53,7 +53,7 @@ class RequestParamCheck {
      * @param $string
      * @return bool
      */
-    private static function isJson($string) {
+    public static function isJson($string) {
         json_decode($string);
         return (json_last_error() == JSON_ERROR_NONE);
     }
@@ -63,7 +63,7 @@ class RequestParamCheck {
      * @param $string
      * @return array
      */
-    private static function json($string) {
+    public static function json($string) {
         $json = json_decode($string);
         return (json_last_error() == JSON_ERROR_NONE) ? array(true, $json) : array(false, null);
     }

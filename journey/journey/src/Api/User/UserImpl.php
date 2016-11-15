@@ -102,9 +102,9 @@ class UserImpl/* implements IUser */{
             return null;
         }
         echo $sql;
-        $result = Db::newInstatnce() -> connect() -> query($sql) ->fetch_array();
+        $result = Db::newInstatnce() -> connect() -> query($sql) -> fetch_array();
         if (!$result) {
-            echo ',,,,,,,';
+            echo ',,,,,,,\n';
             return null;
         }
         $user = new Entity\User();
