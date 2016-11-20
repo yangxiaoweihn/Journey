@@ -11,19 +11,20 @@ use Journey\Api\Journey\JourneyImpl as JourneyImpl;
  */
 class JourneyApi extends BaseApi {
     public function __construct(Slim\App $app){
-        $this->journeyAdd($app);
-        $this->journeyGet($app);
+        parent::__construct($app);
+        $this->journeyAdd();
+        $this->journeyGet();
     }
 
 
-    private function journeyAdd(Slim\App $app) {
+    private function journeyAdd() {
         /**
          * 每个文件的key规则
          * 文件信息key{fileKey}: fileXX
          * 文件简短描述信息key{fileDescKey}: {fileKey}Desc
          * 比如： file1 -> file1Desc || fileImg -> fileImgDesc
          */
-        $app->post('/journey/add', function(SlimRequest $request, SlimResponse $response) {
+        $this->app->post('/journey/add', function(SlimRequest $request, SlimResponse $response) {
             $files = $request->getUploadedFiles();
             $params = $request->getParams();
 
@@ -92,17 +93,17 @@ class JourneyApi extends BaseApi {
         });
     }
 
-    private function journeyGet(Slim\App $app) {
+    private function journeyGet() {
         /**
          * 获取旅途日志数据
          */
-        $app->get('/journey/get', function (\Slim\Http\Request $request, \Slim\Http\Response $response, $args) {
-            if (false == $this->filterHeader($request)) {
+        $this->app->get('/journey/get', function (SlimRequest $request, SlimResponse $response, $args) {
+            if (false == self::filterHeader($request)) {
                 return;
             }
 
             $journeyImpl = new JourneyImpl();
-            $datas = $journeyImpl->getJourneyBy($args['userId'], 0, 0);
+            $datas = $journeyImpl->getJourneyBy($args['userId'], $args[Param_PageOffset], $args[Param_PageSize]);
             ApiResponse::ResponseWith(0, '获取成功', $datas);
         });
     }

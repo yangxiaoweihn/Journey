@@ -31,14 +31,11 @@ require 'UserApi.php';
 require 'JourneyApi.php';
 
 
-use Journey\Api\Response\ApiResponse as ApiResponse;
-
-
-
-
+// start--------register rooter
 new UserApi($app);
 
 new JourneyApi($app);
+// end--------register rooter
 
 // Run app
 $app->run();

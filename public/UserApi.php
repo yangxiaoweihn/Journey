@@ -11,18 +11,20 @@ use Journey\Api\User\UserImpl as UserImpl;
  */
 class UserApi extends BaseApi {
     public function __construct(Slim\App $app) {
-        $this->userLogin($app);
-        $this->userRegister($app);
-        $this->getUserInfo($app);
+        parent::__construct($app);
+        $this->userLogin();
+        $this->userRegister();
+        $this->getUserInfo();
+        $this->userLogout();
     }
 
-    private function userRegister(Slim\App $app) {
-        $app->post('/user/register', function (\Slim\Http\Request $request, \Slim\Http\Response $response, $args) {
-            if (false == $this->filterHeader($request)) {
+    private function userRegister() {
+        $this->app->post('/user/register', function (SlimRequest $request, SlimResponse $response, $args) {
+            if (false == self::filterHeader($request)) {
                 return;
             }
 
-            $json = $this->parseRequestBody($request->getBody()->getContents());
+            $json = self::parseRequestBody($request->getBody()->getContents());
             if ($json[0] == false) {
                 return;
             }
@@ -40,16 +42,16 @@ class UserApi extends BaseApi {
         });
     }
 
-    private function userLogin(Slim\App $app) {
+    private function userLogin() {
         /**
          *
          */
-        $app->post('/user/login', function (\Slim\Http\Request $request, \Slim\Http\Response $response, $args) {
+        $this->app->post('/user/login', function (SlimRequest $request, SlimResponse $response, $args) {
 
-            if (false == $this->filterHeader($request)) {
+            if (false == self::filterHeader($request)) {
                 return;
             }
-            $json = $this->parseRequestBody($request->getBody()->getContents());
+            $json = self::parseRequestBody($request->getBody()->getContents());
             if ($json[0] == false) {
                 return;
             }
@@ -63,8 +65,18 @@ class UserApi extends BaseApi {
         });
     }
 
-    private function getUserInfo(Slim\App $app) {
-        $app->get('/user/userInfo/{id}', function (\Slim\Http\Request $request, \Slim\Http\Response $response, $args) {
+    /**
+     * 用户退出
+     * PUT
+     */
+    private function userLogout() {
+        $this->app->put('/user/logout', function () {
+
+        });
+    }
+
+    private function getUserInfo() {
+        $this->app->get('/user/userInfo/{id}', function (SlimRequest $request, SlimResponse $response, $args) {
             $id = (int) $args['id'];
 
             $userImpl = new UserImpl;

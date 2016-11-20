@@ -3,6 +3,7 @@ use Slim\Http\Request as SlimRequest;
 use Slim\Http\Response as SlimResponse;
 use Journey\Api\Response\ApiResponse as ApiResponse;
 use Journey\Api\Utils\RequestParamCheck as RequestParamCheck;
+use Slim\App as App;
 /**
  * Created by PhpStorm.
  * User: yangxiaowei
@@ -10,6 +11,14 @@ use Journey\Api\Utils\RequestParamCheck as RequestParamCheck;
  * Time: 17:15
  */
 class BaseApi {
+
+    protected $app;
+
+    public function __construct(App $app){
+        $this->app = $app;
+    }
+
+
     /**
      * 拦截处理请求头数据
      *
