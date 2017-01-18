@@ -9,6 +9,7 @@ namespace Journey\Api\User;
 use Journey\Api\User\Entity\User;
 use Journey\Api\Db\Db;
 use Journey\Api\Utils\DateUtils;
+use phpDocumentor\Reflection\Types\Boolean;
 
 /**
  * Created by PhpStorm.
@@ -116,8 +117,8 @@ class UserImpl/* implements IUser */{
         $user -> avatarUrl = $result['avatar_url'];
         $user -> loginToken = $result['login_token'];
         $user -> pushToken = $result['push_token'];
-        $user -> registerTime = DateUtils::dataToPhpFromDb($result['register_time']);
-        $user -> loginTimeLatest = DateUtils::dataToPhpFromDb($result['login_time_latest']);
+        $user -> registerTime = DateUtils::dateToPhpFromDb($result['register_time']);
+        $user -> loginTimeLatest = DateUtils::dateToPhpFromDb($result['login_time_latest']);
         $user -> countConcern = $result['count_concern'];
         $user -> userStatus = $result['user_status'];
         $user -> userType = $result['user_type'];
@@ -226,4 +227,116 @@ class UserImpl/* implements IUser */{
         $connect = Db::newInstatnce() -> connect();
         return $connect -> query($sql) -> fetch_row() > 0;
     }
+
+    /**
+     * 关注
+     *
+     * * md5(concat(concern_user_id, concerned_user_id))作为唯一冲突键
+     * 记录不存在时插入，存在时修改status字段的值
+     *
+     * @param $concernUserId
+     * @param $beConcernedUserId
+     * @return bool
+     */
+    public function concernUser($concernUserId, $beConcernedUserId) {
+        $status = 1;
+        $sql = 'INSERT into `user_concern` '.
+            '(`concern_user_id`, `concerned_user_id`, `status`, `_unique`, `concern_time`)'.
+            'VALUES '.
+            '(?, ?, ?, md5(concat(`concern_user_id`, `concerned_user_id`)), ?)'.
+            'ON DUPLICATE KEY UPDATE `status` = values(`status`), `concern_time` = ?';
+
+        $stmt = Db::newInstatnce()->connect()->prepare($sql);
+        $time = DateUtils::dateToDbFromPhp(time());
+        $stmt->bind_param('iiiss', $concernUserId, $beConcernedUserId, $status, $time, $time);
+        $stmt->execute();
+        $row = $stmt->affected_rows;
+        $stmt->close();
+        return $row != 0;
+    }
+
+    /**
+     * 取消关注
+     * @param $concernUserId
+     * @param $beConcernedUserId
+     * @return bool
+     */
+    public function cancleConcernUser($concernUserId, $beConcernedUserId) {
+        $status = 0;
+        $sql = 'update `user_concern` set `status` = ?, `concern_canceled_time` = ? where `concern_user_id` = ? && `concerned_user_id` = ? ';
+        $stmt = Db::newInstatnce()->connect()->prepare($sql);
+        $stmt->bind_param('isii', $status, DateUtils::dateToDbFromPhp(time()), $concernUserId, $beConcernedUserId);
+        $stmt->execute();
+        $row = $stmt->affected_rows;
+        $stmt->close();
+        return $row != 0;
+    }
+
+
+    /**
+     * 获取关注列表
+     *
+     * @param $concernUserId
+     * @param $pageOffset
+     * @param $pageSize
+     * @return array
+     */
+    public function getConcernUserList($concernUserId, $pageOffset = 0, $pageSize = 0) {
+        echo $concernUserId.'-'.$pageOffset.'-'.$pageSize."\n\n";
+
+        $isPageStartWhere = $pageOffset > 0;
+        //分页起始位置
+        $pageStartWhere = $isPageStartWhere ? ' and user_concern.id < ? ' : '';
+
+        $sql = 'select
+                  user.`user_name`, user.`nick_name`, user.`gender`, user.`avatar_url`,
+                  user.`register_time`, user.`count_concern`,
+                  user_concern.`concern_time`, user_concern.`concerned_user_id`,
+                  user_concern.`id` as page_index
+                from
+                  user, user_concern
+                where
+                  user_concern.concern_user_id = ?
+                and
+                  user.id = user_concern.concern_user_id
+                and
+                  user_concern.status = 1'.
+                $pageStartWhere.'
+                order by 
+                  user_concern.`id` desc 
+                limit ?';
+
+        $stmt = Db::newInstatnce()->connect()->prepare($sql);
+        if($isPageStartWhere == true) {
+            echo '>>>> '.$pageStartWhere;
+            $stmt->bind_param('iii', $concernUserId, $pageOffset, $pageSize);
+        }else {
+            $stmt->bind_param('ii', $concernUserId, $pageSize);
+        }
+        $stmt->execute();
+        $stmt->bind_result(
+            $userName, $nickName, $gender, $avatarUrl, $registerTime,
+            $countConcern, $concernTime, $beConcernedUserId, $pageIndex);
+
+        $result = array();
+        while ($stmt->fetch()) {
+            $record = array(
+                'userName'=>$userName,
+                'nickName'=>$nickName,
+                'gender'=>$gender,
+                'avatarUrl'=>$avatarUrl,
+                'registerTime'=>DateUtils::dateToPhpFromDb($registerTime),
+                'countConcern'=>$countConcern,
+                'concernTime'=>DateUtils::dateToPhpFromDb($concernTime),
+                'beConcernedUserId'=>$beConcernedUserId,
+                'pageIndex'=>$pageIndex
+            );
+            array_push($result, $record);
+        }
+
+        $stmt->close();
+
+        return $result;
+    }
+
 }

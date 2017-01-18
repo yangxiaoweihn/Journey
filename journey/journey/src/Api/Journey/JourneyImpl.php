@@ -5,6 +5,7 @@ use Journey\Api\Db\Db as Db;
 use Journey\Api\Journey\Entity\Journey as Journey;
 use Journey\Api\Utils\DateUtils;
 use Journey\Api\Common\ErrorCode as ErrorCode;
+use Monolog\Logger;
 
 /**
  * Created by PhpStorm.
@@ -33,8 +34,8 @@ class JourneyImpl {
     public function addJourneyWithEntity(Journey $journey) {
         if (null == $journey || empty($journey->mdDatas) || 0 == $journey->userId) {
             return array(
-                'code'=>1000,
-                'msg'=>ErrorCode::$ER_PARAM['1000']);
+                'code'=>ErrorCode::ER_PARAM_DISMISS,
+                'msg'=>ErrorCode::$ER_PARAM[ErrorCode::ER_PARAM_DISMISS]);
         }
 
         $sql = "insert into `journey`
@@ -59,8 +60,8 @@ class JourneyImpl {
 
         if (!$rel) {
             return array(
-                'code'=>2000,
-                'msg'=>ErrorCode::$ER_SERVER['2000']
+                'code'=>ErrorCode::ER_SERVER_OPERATE,
+                'msg'=>ErrorCode::$ER_SERVER[ErrorCode::ER_SERVER_OPERATE]
             );
         }
         return array(
@@ -111,5 +112,22 @@ class JourneyImpl {
 
         $mysqliStmt->close();
         return $datas;
+    }
+
+    /**
+     * 喜欢该条日志
+     * @param $journeyId
+     * @return array
+     */
+    public function likeJourneyBy($journeyId) {
+        if ($journeyId <= 0) {
+            return ErrorCode::ER_PARAM_DISMISS;
+        }
+        $sql = "update `journey` set `count_like` = `count_like` + 1 WHERE `id` = ".$journeyId;
+        echo $sql."\n";
+
+        $rel = Db::newInstatnce()->connect()->prepare($sql);
+        $rel->execute();
+        return 0 == $rel->affected_rows ? ErrorCode::ER_SERVER_NOT_EXIST : ErrorCode::ER_SUCCESS;
     }
 }

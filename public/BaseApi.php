@@ -41,4 +41,28 @@ class BaseApi {
     protected function parseRequestBody($body) {
         return RequestParamCheck::json($body);
     }
+
+    /**
+     * userId校验
+     * @param $userId
+     * @return bool
+     */
+    protected function checkUserId($userId) {
+        if (!is_numeric($userId)) {
+            $code = ErrorCode::ER_PARAM_TYPE_DIS;
+            ApiResponse::ResponseWith($code, ErrorCode::$ER_PARAM[$code]);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 参数$param没有设置时设置为默认值，否则原值返回
+     * @param $param
+     * @param int $default
+     * @return int|string
+     */
+    protected function checkIntParamAndSetDefault($param, $default = 0) {
+        return is_numeric($param) ? $param : $default;
+    }
 }

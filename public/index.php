@@ -29,12 +29,15 @@ require __DIR__ . '/../src/routes.php';
 require 'BaseApi.php';
 require 'UserApi.php';
 require 'JourneyApi.php';
+require 'JourneyCommentApi.php';
 
 
 // start--------register rooter
 new UserApi($app);
 
 new JourneyApi($app);
+
+new JourneyCommentApi($app);
 // end--------register rooter
 
 // Run app

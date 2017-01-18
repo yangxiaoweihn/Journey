@@ -3,6 +3,7 @@ use Slim\Http\Request as SlimRequest;
 use Slim\Http\Response as SlimResponse;
 use Journey\Api\Response\ApiResponse as ApiResponse;
 use Journey\Api\Journey\JourneyImpl as JourneyImpl;
+use Journey\Api\Common\ErrorCode as ErrorCode;
 /**
  * Created by PhpStorm.
  * User: yangxiaowei
@@ -14,6 +15,7 @@ class JourneyApi extends BaseApi {
         parent::__construct($app);
         $this->journeyAdd();
         $this->journeyGet();
+        $this->journeyLikeBy();
     }
 
 
@@ -105,6 +107,20 @@ class JourneyApi extends BaseApi {
             $journeyImpl = new JourneyImpl();
             $datas = $journeyImpl->getJourneyBy($args['userId'], $args[Param_PageOffset], $args[Param_PageSize]);
             ApiResponse::ResponseWith(0, '获取成功', $datas);
+        });
+    }
+
+    private function journeyLikeBy() {
+        /**
+         * 喜欢旅途日志
+         */
+        $this->app->put('/journey/like', function (SlimRequest $request, SlimResponse $response, $args) {
+            if (false == self::filterHeader($request)) {
+                return;
+            }
+            $journeyImpl = new JourneyImpl();
+            $rel = $journeyImpl->likeJourneyBy($request->getParam('journeyId'));
+            ApiResponse::ResponseWith($rel, ErrorCode::ER_SUCCESS == $rel ? '操作成功' : ErrorCode::$ER_ALL[$rel], null);
         });
     }
 }

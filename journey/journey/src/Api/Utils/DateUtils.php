@@ -14,7 +14,7 @@ class DateUtils {
      * @return false|string
      */
     public static function dateToDbFromPhp($time) {
-        return date('Y-m-d H:i:s', $time);
+        return count($time) == 0 ? $time : date('Y-m-d H:i:s', $time);
     }
 
     /**
@@ -22,7 +22,7 @@ class DateUtils {
      * @param $time
      * @return false|int
      */
-    public static function dataToPhpFromDb($time) {
-        return strtotime($time);
+    public static function dateToPhpFromDb($time) {
+        return count($time) == 0 ? $time : strtotime($time);
     }
 }
